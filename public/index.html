@@ -14,13 +14,31 @@
       </section>
 
       <section class="controls">
-        <button id="play-button">Play</button>
-        <label class="tempo-label">
-          Tempo
-          <input id="tempo" type="range" min="60" max="180" value="100" />
-          <span id="tempo-value">100 BPM</span>
-        </label>
-        <div class="status">현재 스텝: <span id="step">1</span></div>
+        <div class="left-controls">
+          <button id="play-button">Play</button>
+          <label class="tempo-label">
+            Tempo
+            <input id="tempo" type="range" min="60" max="180" value="100" />
+            <span id="tempo-value">100 BPM</span>
+          </label>
+          <div class="status">현재 스텝: <span id="step">1</span></div>
+        </div>
+
+        <div class="right-controls">
+          <label>Instrument
+            <select id="instrument">
+              <option value="sine">Sine</option>
+              <option value="square">Square</option>
+              <option value="sawtooth">Sawtooth</option>
+              <option value="triangle">Triangle</option>
+              <option value="noise">Noise</option>
+            </select>
+          </label>
+
+          <button id="save-pattern">Save</button>
+          <button id="load-pattern">Load</button>
+          <button id="clear-pattern">Clear</button>
+        </div>
       </section>
 
       <section id="grid" class="grid"></section>

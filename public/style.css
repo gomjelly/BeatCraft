@@ -39,7 +39,7 @@ body {
   display: flex;
   flex-wrap: wrap;
   gap: 16px;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
 }
@@ -50,7 +50,7 @@ body {
 }
 
 #play-button {
-  padding: 12px 24px;
+  padding: 10px 18px;
   border-radius: 999px;
   background: #5e7cff;
   color: white;
@@ -100,6 +100,14 @@ body {
   cursor: pointer;
   transition: transform 0.15s ease, background 0.15s ease;
 }
+
+.grid-row .row-label { font-size: 0.85rem; }
+
+.left-controls, .right-controls { display: flex; gap: 12px; align-items: center; }
+
+.right-controls label, .left-controls label { display: flex; gap: 8px; align-items: center; color: #d3d8f5; }
+
+.controls button { background: #2a355b; color: #fff; padding: 8px 10px; border-radius: 8px; border: none; }
 
 .grid-cell:hover {
   transform: translateY(-1px);

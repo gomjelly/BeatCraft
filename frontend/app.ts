@@ -1,4 +1,20 @@
-const rows = ["C4", "D4", "E4", "G4", "A4"];
+const rows = [
+  "C6",
+  "B5",
+  "A5",
+  "G5",
+  "F5",
+  "E5",
+  "D5",
+  "C5",
+  "B4",
+  "A4",
+  "G4",
+  "F4",
+  "E4",
+  "D4",
+  "C4",
+];
 const columns = 16;
 const tempo = { value: 100 };
 let isPlaying = false;
@@ -8,11 +24,21 @@ let intervalId: number | null = null;
 const activeGrid = Array.from({ length: rows.length }, () => Array(columns).fill(false));
 
 const noteFrequencies: Record<string, number> = {
-  C4: 261.63,
-  D4: 293.66,
-  E4: 329.63,
-  G4: 392.0,
+  C6: 1046.5,
+  B5: 987.77,
+  A5: 880.0,
+  G5: 783.99,
+  F5: 698.46,
+  E5: 659.26,
+  D5: 587.33,
+  C5: 523.25,
+  B4: 493.88,
   A4: 440.0,
+  G4: 392.0,
+  F4: 349.23,
+  E4: 329.63,
+  D4: 293.66,
+  C4: 261.63,
 };
 
 const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
@@ -53,10 +79,11 @@ function scheduleStep() {
   const stepLabel = document.getElementById("step");
   if (stepLabel) stepLabel.textContent = String(currentStep + 1);
 
+  const instrument = (document.getElementById("instrument") as HTMLSelectElement | null)?.value || "sine";
   for (let row = 0; row < rows.length; row += 1) {
     const note = rows[row];
     if (!activeGrid[row][currentStep]) continue;
-    playTone(noteFrequencies[note], 0.2);
+    playTone(noteFrequencies[note], 0.18, instrument);
   }
 
   highlightColumn(currentStep);
@@ -71,11 +98,26 @@ function highlightColumn(col: number) {
   });
 }
 
-function playTone(frequency: number, duration: number) {
+function playTone(frequency: number, duration: number, instrument = "sine") {
+  if (instrument === "noise") {
+    const bufferSize = Math.floor(audioContext.sampleRate * duration);
+    const buffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) data[i] = (Math.random() * 2 - 1) * 0.5;
+    const src = audioContext.createBufferSource();
+    src.buffer = buffer;
+    const g = audioContext.createGain();
+    g.gain.value = 0.25;
+    src.connect(g);
+    g.connect(audioContext.destination);
+    src.start();
+    return;
+  }
+
   const oscillator = audioContext.createOscillator();
   const gain = audioContext.createGain();
 
-  oscillator.type = "sine";
+  oscillator.type = instrument as OscillatorType;
   oscillator.frequency.value = frequency;
   gain.gain.value = 0.15;
 
@@ -88,7 +130,7 @@ function playTone(frequency: number, duration: number) {
 
 function startPlayback() {
   if (intervalId !== null) return;
-  const intervalMs = (60 / tempo.value) * 250;
+  const intervalMs = (60 / tempo.value) * 1000 / 4; // 16th notes
   intervalId = window.setInterval(scheduleStep, intervalMs);
   isPlaying = true;
   updatePlayButton();
@@ -138,6 +180,70 @@ function initControls() {
         startPlayback();
       }
     });
+  }
+
+  const saveBtn = document.getElementById("save-pattern");
+  const loadBtn = document.getElementById("load-pattern");
+  const clearBtn = document.getElementById("clear-pattern");
+
+  if (saveBtn) saveBtn.addEventListener("click", () => {
+    const name = prompt("Pattern name", `pattern-${new Date().toISOString()}`);
+    if (!name) return;
+    savePattern(name);
+    alert("Saved pattern: " + name);
+  });
+
+  if (loadBtn) loadBtn.addEventListener("click", () => {
+    const saved = listPatterns();
+    if (!saved.length) {
+      alert("No saved patterns");
+      return;
+    }
+    const name = prompt("Load pattern name:\n" + saved.join("\n"), saved[0]);
+    if (!name) return;
+    loadPattern(name);
+  });
+
+  if (clearBtn) clearBtn.addEventListener("click", () => {
+    if (!confirm("Clear the grid?")) return;
+    for (let r = 0; r < rows.length; r++) activeGrid[r].fill(false);
+    document.querySelectorAll<HTMLButtonElement>(".grid-cell").forEach(c => c.classList.remove("active"));
+  });
+}
+
+function savePattern(name: string) {
+  const payload = { rows, columns, grid: activeGrid, tempo: tempo.value };
+  const patterns = JSON.parse(localStorage.getItem("beatcraft.patterns") || "{}");
+  patterns[name] = payload;
+  localStorage.setItem("beatcraft.patterns", JSON.stringify(patterns));
+}
+
+function listPatterns(): string[] {
+  const patterns = JSON.parse(localStorage.getItem("beatcraft.patterns") || "{}");
+  return Object.keys(patterns);
+}
+
+function loadPattern(name: string) {
+  const patterns = JSON.parse(localStorage.getItem("beatcraft.patterns") || "{}");
+  const p = patterns[name];
+  if (!p) return alert("Pattern not found: " + name);
+  // ensure grid shape
+  for (let r = 0; r < rows.length; r++) {
+    for (let c = 0; c < columns; c++) {
+      activeGrid[r][c] = !!(p.grid && p.grid[r] && p.grid[r][c]);
+    }
+  }
+  document.querySelectorAll<HTMLButtonElement>(".grid-cell").forEach(cell => {
+    const r = Number(cell.dataset.row);
+    const c = Number(cell.dataset.col);
+    cell.classList.toggle("active", activeGrid[r][c]);
+  });
+  if (p.tempo) {
+    tempo.value = p.tempo;
+    const tempoSlider = document.getElementById("tempo") as HTMLInputElement | null;
+    const tempoValue = document.getElementById("tempo-value");
+    if (tempoSlider) tempoSlider.value = String(tempo.value);
+    if (tempoValue) tempoValue.textContent = `${tempo.value} BPM`;
   }
 }
 
