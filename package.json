@@ -1,0 +1,23 @@
+{
+  "name": "beatcraft",
+  "version": "0.1.0",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "build:server": "tsc -p tsconfig.server.json",
+    "build:frontend": "tsc -p tsconfig.frontend.json",
+    "build": "npm run build:server && npm run build:frontend",
+    "watch:frontend": "tsc -p tsconfig.frontend.json --watch",
+    "dev": "concurrently \"npm run watch:frontend\" \"ts-node-dev --respawn --transpile-only --project tsconfig.server.json src/server.ts\"",
+    "start": "node dist/server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.17",
+    "concurrently": "^9.2.1",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.5.4"
+  }
+}

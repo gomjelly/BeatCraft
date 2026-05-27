@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BeatCraft Song Maker</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="hero">
+        <h1>BeatCraft</h1>
+        <p>간단한 리듬/멜로디 시퀀서를 만들어보세요.</p>
+      </section>
+
+      <section class="controls">
+        <button id="play-button">Play</button>
+        <label class="tempo-label">
+          Tempo
+          <input id="tempo" type="range" min="60" max="180" value="100" />
+          <span id="tempo-value">100 BPM</span>
+        </label>
+        <div class="status">현재 스텝: <span id="step">1</span></div>
+      </section>
+
+      <section id="grid" class="grid"></section>
+    </main>
+
+    <script type="module" src="build/app.js"></script>
+  </body>
+</html>
